@@ -45,7 +45,6 @@ uint8_t receiveByte(void) {
   return UDR0;                                /* return register value */
 }
 
-
                        /* Here are a bunch of useful printing commands */
 
 void printString(const char myString[]) {
