@@ -32,7 +32,6 @@ ISR(INT0_vect) {
 void initInterrupt0(void) {
   EIMSK |= (1 << INT0);
   EICRA |= (1 << ISC00);
-  sei();
 }
 
 void didChangeSwitch() {
@@ -43,11 +42,22 @@ void didChangeSwitch() {
   }
 }
 
+// Refactor: SPI
+ISR(SPI_STC_vect) {
+  SLAVE_SELECT;
+  //SPDR = byte;
+  SLAVE_DESELECT;
+}
+
+void initSPIInterrupt() {
+  SPCR |= (1 << SPIE);
+}
+
 // Refactor: ADC setup
 
 ISR(ADC_vect) {
   currentStatePtr->knobFlag = 1;
-  currentStatePtr->knobValue = ADCH;
+  currentStatePtr->knobValue = (ADCH >> 5); // drop four bits of precision
   startADC();
 }
 
@@ -156,6 +166,9 @@ int main(void) {
   initInterrupt0();
   initADCInterrupt();
   initUARTInterrupt();
+  initSPIInterrupt();
+
+  sei(); // turn on global interrupts
 
   // TODO PC0/ADC0 connected to the potentiometer
   startADC();
